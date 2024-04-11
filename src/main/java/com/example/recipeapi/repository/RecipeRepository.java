@@ -27,10 +27,10 @@ public interface RecipeRepository extends CrudRepository<RecipeDetails, Integer>
             "FROM Recipe r " +
             "LEFT JOIN RecipeIngredient ri ON r.recipe_id = ri.recipe_id " +
             "LEFT JOIN Ingredient i ON ri.ingredient_id = i.ingredient_id " +
-            "WHERE i.name IN (:availableIngredients) AND (ri.quantity <= :availableQuantity OR ri.quantity IS NULL) AND i.name NOT IN ('Sare', 'Piper') " +  // Dynamic part for filtering
+            "WHERE i.name IN (:availableIngredients) AND i.name NOT IN ('Sare', 'Piper') " +
             "GROUP BY r.recipe_id", nativeQuery = true)
-    List<RecipeDetails> getRecipeDetailsByAvailableIngredients(@Param("availableIngredients") List<String> availableIngredients,
-                                                               @Param("availableQuantity") List<Integer> availableQuantity);
+    List<RecipeDetails> getRecipeDetailsByAvailableIngredients(@Param("availableIngredients") List<String> availableIngredients);
+
 
     @Query(value = "SELECT r.recipe_id AS recipeid, r.title AS recipe_title, r.description AS recipe_description, " +
             "r.instructions AS recipe_instructions, r.servings AS servings, " +

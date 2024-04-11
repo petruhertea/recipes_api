@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -41,11 +43,15 @@ public class RecipeApiController {
             return new ResponseEntity<>("Recipes not found", HttpStatus.NOT_FOUND);
         }
     }
-
     @GetMapping("/recipes/byIngredients")
-    public ResponseEntity getAllRecipesByIngredients(@RequestParam("ingredients") List<String> availableIngredients,
-                                                     @RequestParam("quantity") List<Integer> availableQuantity) {
-        List<RecipeDetails> recipeDetails = recipeService.getRecipesFromAvailableIngredients(availableIngredients,availableQuantity);
+    public ResponseEntity getAllRecipesByIngredients(@RequestParam("ingredients") List<String> availableIngredients) {
+
+        /*
+        List<Double> availableIngredientQuantities = Arrays.stream(availableQuantitiesStrings)
+                .map(Double::parseDouble)
+                .collect(Collectors.toList());
+        */
+        List<RecipeDetails> recipeDetails = recipeService.getRecipesFromAvailableIngredients(availableIngredients);
 
         if (recipeDetails != null) {
             return new ResponseEntity<>(recipeDetails, HttpStatus.OK);
@@ -53,5 +59,6 @@ public class RecipeApiController {
             return new ResponseEntity<>("Recipes not found", HttpStatus.NOT_FOUND);
         }
     }
+
 
 }
