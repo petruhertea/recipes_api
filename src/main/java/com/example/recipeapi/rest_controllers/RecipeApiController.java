@@ -10,7 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -40,20 +43,26 @@ public class RecipeApiController {
             return new ResponseEntity<>("Recipes not found", HttpStatus.NOT_FOUND);
         }
     }
-    @GetMapping("/recipes/byIngredients")
-    public ResponseEntity getAllRecipesByIngredients(@RequestParam("ingredients") List<String> availableIngredients) {
 
-        /*
-        List<Double> availableIngredientQuantities = Arrays.stream(availableQuantitiesStrings)
-                .map(Double::parseDouble)
-                .collect(Collectors.toList());
-        */
-        List<RecipeDetails> recipeDetails = recipeService.getRecipesFromAvailableIngredients(availableIngredients);
+    @GetMapping("/recipes/byIngredients")
+    public ResponseEntity getAllRecipesByIngredients(@RequestParam("ingredients")String[] availableIngredients) {
+        System.out.println(Arrays.toString(availableIngredients));
+        Map<String, Double> map = new HashMap<>();
+        for (String ingredientString : availableIngredients) {
+            String[] ingredientParts = ingredientString.split("=");
+            if (ingredientParts.length == 2) {
+                map.put(ingredientParts[0], Double.parseDouble(ingredientParts[1]));
+            } else {
+                // Handle invalid ingredient format (optional)
+            }
+        }
+
+        List<RecipeDetails> recipeDetails = recipeService.getRecipesFromAvailableIngredients(map);
 
         if (recipeDetails != null) {
             return new ResponseEntity<>(recipeDetails, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>("Recipes not found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Recipes not found", HttpStatus.I_AM_A_TEAPOT);
         }
     }
 
