@@ -6,6 +6,7 @@ import com.example.recipeapi.repository.RecipeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
 import java.util.List;
 import java.util.Map;
 
@@ -19,40 +20,41 @@ public class RecipeService {
         return recipeRepository.getAllRecipeDetails();
     }
 
+
     public List<RecipeDetails> getRecipesFromAvailableIngredients(Map<String, IngredientDetails> availableIngredients) {
         var temp = recipeRepository.getAllRecipeDetails();
-        var set = availableIngredients.keySet();
 
         return temp.stream()
-                .filter(e -> {
-                    String[] ingredients = e.getIngredients().split(",");
-                    boolean hasAtLeastOneIngredient = false;
+                .filter(recipe -> {
+                    String[] ingredients = recipe.getIngredients().split(",");
+                    boolean hasMatchingIngredient = false;
                     for (String ingredient : ingredients) {
                         String[] details = ingredient.split(":");
+                        String ingredientName = Normalizer.normalize(details[0].trim(), Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "").toLowerCase();
+                        double weight = extractWeight(details[1].trim());
+                        String recipeUnit = details[1].trim().split(" ")[1];
 
-                        if (set.contains(details[0].trim())) {
-                            hasAtLeastOneIngredient = true;
-                            IngredientDetails ingredientDetails = availableIngredients.get(details[0].trim());
-                            double weight = extractWeight(details[1].trim());
-                            String recipeUnit = details[1].trim().split(" ")[1];
+                        for (String availableIngredientName : availableIngredients.keySet()) {
+                            String normalizedAvailableName = Normalizer.normalize(availableIngredientName, Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "").toLowerCase();
+                            if (ingredientName.contains(normalizedAvailableName) || normalizedAvailableName.contains(ingredientName)) {
+                                hasMatchingIngredient = true;
+                                IngredientDetails ingredientDetails = availableIngredients.get(availableIngredientName);
 
-                            String requestUnit = ingredientDetails.getUnit(); // Get the request unit
+                                String requestUnit = ingredientDetails.getUnit(); // Get the request unit
 
-                            //convert the requestUnit to the recipeUnit if necessary
+                                if (!recipeUnit.equals(requestUnit)) {
+                                    weight = convertUnits(requestUnit, recipeUnit, weight);
+                                    recipeUnit = requestUnit;
+                                }
 
-                            if (!recipeUnit.equals(requestUnit)) {
-                                weight = convertUnits(requestUnit, recipeUnit, weight);
-                                recipeUnit = requestUnit;
-                            }
-
-                            //weight = convertUnits(recipeUnit, requestUnit, weight);
-
-                            if (weight > ingredientDetails.getWeight() || !recipeUnit.equals(requestUnit)) {
-                                return false; // If the weight is more than available or units don't match, discard recipe
+                                if (weight > ingredientDetails.getWeight() || !recipeUnit.equals(requestUnit)) {
+                                    return false; // If the weight is more than available or units don't match, discard recipe
+                                }
+                                break; // Found a matching ingredient, no need to check further
                             }
                         }
                     }
-                    return hasAtLeastOneIngredient; // Return true if at least one ingredient matches
+                    return hasMatchingIngredient; // Return true if at least one ingredient matches
                 })
                 .toList();
     }
