@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface BeverageRepository extends CrudRepository<BeverageSuggestions,Integer> {
+public interface BeverageRepository extends CrudRepository<BeverageSuggestions, Integer> {
     @Query(value = "SELECT b.beverage_id AS beverageId, b.name AS beverage_suggestions, " +
             "b.beverage_image AS beverage_image " +
             "FROM Recipe r " +

@@ -1,7 +1,7 @@
 package com.example.recipeapi.model;
 
 public class IngredientDetails {
-    private double weight;
+    private final double weight;
     private String unit;
 
     public IngredientDetails(double weight, String unit) {
@@ -23,5 +23,11 @@ public class IngredientDetails {
 
     public void setUnit(String unit) {
         this.unit = unit;
+    }
+
+    @Override
+    public String toString() {
+        return weight + unit;
+
     }
 }

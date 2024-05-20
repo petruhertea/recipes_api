@@ -18,14 +18,14 @@ public class BeverageSuggestionsController {
 
     @Autowired
     BeverageService beverageService;
-    @GetMapping("/recipe/suggestions")
-    public ResponseEntity getBeverageSuggestions(@RequestParam("recipe_id") Integer recipeId){
-        List<BeverageSuggestions> beverageSuggestions=beverageService.getBeverageDetailsMethod(recipeId);
 
-        if(beverageSuggestions!=null || recipeId!=null){
+    @GetMapping("/recipe/suggestions")
+    public ResponseEntity getBeverageSuggestions(@RequestParam("recipe_id") Integer recipeId) {
+        List<BeverageSuggestions> beverageSuggestions = beverageService.getBeverageDetailsMethod(recipeId);
+
+        if (beverageSuggestions != null || recipeId != null) {
             return new ResponseEntity<>(beverageSuggestions, HttpStatus.OK);
-        }
-        else{
+        } else {
             return new ResponseEntity<>("Beverages not found", HttpStatus.NOT_FOUND);
         }
     }

@@ -6,12 +6,9 @@ import com.example.recipeapi.services.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,49 +42,33 @@ public class RecipeApiController {
         }
     }
 
-    @GetMapping("/recipes/byIngredients")
-    public ResponseEntity getAllRecipesByIngredients(@RequestParam("ingredients")String[] availableIngredients) {
-
-        //Change the code, so it accepts the IngredientDetails class as a hashmap parameter
-        System.out.println(Arrays.toString(availableIngredients));
+    @PostMapping("/recipes/byIngredients")
+    public ResponseEntity getAllRecipesByIngredients(@RequestBody Map<String, IngredientDetails> ingredientMap) {
         Map<String, IngredientDetails> map = new HashMap<>();
-        for (String ingredientString : availableIngredients) {
-            String[] ingredientParts = ingredientString.split("=");
-            String measureUnit = ingredientParts[1].split(" ")[1];
-            if (ingredientParts.length == 2) {
-                map.put(ingredientParts[0], new IngredientDetails(extractWeight(ingredientParts[1].trim()), measureUnit));
-            } else {
-                // Handle invalid ingredient format
-                return new ResponseEntity<>("Invalid ingredient format: " + ingredientString, HttpStatus.BAD_REQUEST);
-            }
+        for (Map.Entry<String, IngredientDetails> entry : ingredientMap.entrySet()) {
+            String ingredientName = entry.getKey();
+            IngredientDetails ingredientDetails = entry.getValue();
+            map.put(ingredientName, ingredientDetails);
         }
 
         List<RecipeDetails> recipeDetails = recipeService.getRecipesFromAvailableIngredients(map);
 
         if (recipeDetails != null) {
-            return new ResponseEntity<>(recipeDetails, HttpStatus.OK);
+            return ResponseEntity.ok(recipeDetails);
         } else {
-            return new ResponseEntity<>("Recipes not found", HttpStatus.I_AM_A_TEAPOT);
+            return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).body(Collections.singletonList("Recipes not found"));
         }
     }
 
     private double extractWeight(String s) {
-        int start = 0;
-        for (int i = 0; i < s.length(); i++) {
-            if (Character.isDigit(s.charAt(i))) {
-                start = i;
-                break;
-            }
+        String[] parts = s.split(":");
+        if (parts.length >= 2) {
+            String weightString = parts[1].trim();
+            return Double.parseDouble(weightString);
+        } else {
+            // Handle invalid ingredient format
+            throw new IllegalArgumentException("Invalid ingredient format: " + s);
         }
-        int stop = 0;
-        for (int i = start + 1; i < s.length(); i++) {
-            if (s.charAt(i) == ' ') {
-                stop = i;
-                break;
-            }
-        }
-        return Double.parseDouble(s.substring(start, stop));
-
     }
 
 

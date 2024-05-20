@@ -11,7 +11,8 @@ import java.util.List;
 public class BeverageService {
     @Autowired
     BeverageRepository beverageRepository;
-    public List<BeverageSuggestions> getBeverageDetailsMethod(Integer recipeId){
+
+    public List<BeverageSuggestions> getBeverageDetailsMethod(Integer recipeId) {
         return beverageRepository.getAllBeverageSuggestions(recipeId);
     }
 }
