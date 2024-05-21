@@ -9,7 +9,7 @@ public class BeverageSuggestions {
     private Integer beverageID;
 
     private String beverageSuggestions;
-    private byte[] beverageImage;
+    private String beverageImage;
 
     public Integer getBeverageID() {
         return beverageID;
@@ -27,11 +27,11 @@ public class BeverageSuggestions {
         this.beverageSuggestions = beverageSuggestions;
     }
 
-    public byte[] getBeverageImage() {
+    public String getBeverageImage() {
         return beverageImage;
     }
 
-    public void setBeverageImage(byte[] beverageImage) {
+    public void setBeverageImage(String beverageImage) {
         this.beverageImage = beverageImage;
     }
 }

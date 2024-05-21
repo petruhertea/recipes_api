@@ -13,9 +13,9 @@ public interface RecipeRepository extends CrudRepository<RecipeDetails, Integer>
             "r.prep_time_minutes AS prep_time_minutes, r.cook_time_minutes AS cook_time_minutes, " +
             "r.total_time_minutes AS total_time_minutes, r.recipe_image AS recipe_image, " +
             "GROUP_CONCAT(CONCAT(i.name, ': ', ri.quantity,COALESCE(CONCAT(' ', ri.measure_unit), '')) SEPARATOR ', ') AS Ingredients " +
-            "FROM Recipe r " +
-            "LEFT JOIN RecipeIngredient ri ON r.recipe_id = ri.recipe_id " +
-            "LEFT JOIN Ingredient i ON ri.ingredient_id = i.ingredient_id " +
+            "FROM recipe r " +
+            "LEFT JOIN recipeingredient ri ON r.recipe_id = ri.recipe_id " +
+            "LEFT JOIN ingredient i ON ri.ingredient_id = i.ingredient_id " +
             "GROUP BY r.recipe_id", nativeQuery = true)
     List<RecipeDetails> getAllRecipeDetails();
 

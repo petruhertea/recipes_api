@@ -27,7 +27,7 @@ public class IngredientDetails {
 
     @Override
     public String toString() {
-        return weight + unit;
+        return weight + " " + unit;
 
     }
 }

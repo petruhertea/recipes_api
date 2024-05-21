@@ -15,7 +15,7 @@ public class RecipeDetails {
     private int prep_time_minutes;
     private int cook_time_minutes;
     private int total_time_minutes;
-    private byte[] recipeImage;
+    private String recipeImage;
     private String ingredients;
 
     public Integer getRecipeID() {
@@ -82,11 +82,11 @@ public class RecipeDetails {
         this.total_time_minutes = total_time_minutes;
     }
 
-    public byte[] getRecipeImage() {
+    public String getRecipeImage() {
         return recipeImage;
     }
 
-    public void setRecipeImage(byte[] recipeImage) {
+    public void setRecipeImage(String recipeImage) {
         this.recipeImage = recipeImage;
     }
 

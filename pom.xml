@@ -49,6 +49,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<finalName>recipe-suggestions</finalName>
 	</build>
 
 </project>

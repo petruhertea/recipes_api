@@ -60,16 +60,4 @@ public class RecipeApiController {
         }
     }
 
-    private double extractWeight(String s) {
-        String[] parts = s.split(":");
-        if (parts.length >= 2) {
-            String weightString = parts[1].trim();
-            return Double.parseDouble(weightString);
-        } else {
-            // Handle invalid ingredient format
-            throw new IllegalArgumentException("Invalid ingredient format: " + s);
-        }
-    }
-
-
 }
