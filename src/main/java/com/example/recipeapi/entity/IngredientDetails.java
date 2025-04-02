@@ -1,4 +1,4 @@
-package com.example.recipeapi.model;
+package com.example.recipeapi.entity;
 
 public class IngredientDetails {
     private final double weight;

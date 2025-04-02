@@ -1,9 +1,8 @@
-package com.example.recipeapi.rest_controllers;
+package com.example.recipeapi.rest;
 
-import com.example.recipeapi.model.IngredientDetails;
-import com.example.recipeapi.model.RecipeDetails;
-import com.example.recipeapi.services.RecipeService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.recipeapi.entity.IngredientDetails;
+import com.example.recipeapi.entity.RecipeDetails;
+import com.example.recipeapi.service.RecipeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,14 +14,16 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
-public class RecipeApiController {
-
-    @Autowired
+public class RecipeRestController {
     RecipeService recipeService;
+
+    RecipeRestController(RecipeService recipeService) {
+        this.recipeService = recipeService;
+    }
 
     @GetMapping("/recipes")
     public ResponseEntity getAllRecipes() {
-        List<RecipeDetails> recipeDetails = recipeService.getRecipeDetailsMethod();
+        List<RecipeDetails> recipeDetails = recipeService.getAllRecipeDetails();
 
         if (recipeDetails != null) {
             return new ResponseEntity<>(recipeDetails, HttpStatus.OK);
@@ -31,8 +32,8 @@ public class RecipeApiController {
         }
     }
 
-    @GetMapping("/recipe")
-    public ResponseEntity getRecipeByID(@RequestParam("recipe_id") Integer recipeID) {
+    @GetMapping("/recipes/{recipeID}")
+    public ResponseEntity getRecipeByID(@PathVariable("recipeID") Integer recipeID) {
         RecipeDetails recipeDetails = recipeService.getRecipeById(recipeID);
 
         if (recipeDetails != null) {
@@ -51,7 +52,7 @@ public class RecipeApiController {
             map.put(ingredientName, ingredientDetails);
         }
 
-        List<RecipeDetails> recipeDetails = recipeService.getRecipesFromAvailableIngredients(map);
+        List<RecipeDetails> recipeDetails = recipeService.getRecipesByAvailableIngredients(map);
 
         if (recipeDetails != null) {
             return ResponseEntity.ok(recipeDetails);

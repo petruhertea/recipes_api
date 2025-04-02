@@ -1,27 +1,28 @@
-package com.example.recipeapi.rest_controllers;
+package com.example.recipeapi.rest;
 
-import com.example.recipeapi.model.BeverageSuggestions;
-import com.example.recipeapi.services.BeverageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.recipeapi.entity.Beverage;
+import com.example.recipeapi.service.BeverageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-public class BeverageSuggestionsController {
-
-    @Autowired
+public class BeverageRestController {
     BeverageService beverageService;
 
-    @GetMapping("/recipe/suggestions")
-    public ResponseEntity getBeverageSuggestions(@RequestParam("recipe_id") Integer recipeId) {
-        List<BeverageSuggestions> beverageSuggestions = beverageService.getBeverageDetailsMethod(recipeId);
+    BeverageRestController(BeverageService beverageService) {
+        this.beverageService = beverageService;
+    }
+
+    @GetMapping("/recipes/beverages/{recipeID}")
+    public ResponseEntity getBeverageSuggestions(@PathVariable("recipeID") Integer recipeId) {
+        List<Beverage> beverageSuggestions = beverageService.getBeverageSuggestions(recipeId);
 
         if (beverageSuggestions != null || recipeId != null) {
             return new ResponseEntity<>(beverageSuggestions, HttpStatus.OK);

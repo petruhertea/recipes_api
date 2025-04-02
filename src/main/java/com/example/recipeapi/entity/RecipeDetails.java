@@ -1,4 +1,4 @@
-package com.example.recipeapi.model;
+package com.example.recipeapi.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
