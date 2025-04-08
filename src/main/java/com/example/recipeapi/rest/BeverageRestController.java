@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 public class BeverageRestController {
     BeverageService beverageService;
 
@@ -20,7 +20,7 @@ public class BeverageRestController {
         this.beverageService = beverageService;
     }
 
-    @GetMapping("/recipes/beverages/{recipeID}")
+    @GetMapping("/recipes/{recipeID}/beverages")
     public ResponseEntity getBeverageSuggestions(@PathVariable("recipeID") Integer recipeId) {
         List<Beverage> beverageSuggestions = beverageService.getBeverageSuggestions(recipeId);
 

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 public class RecipeRestController {
     RecipeService recipeService;
 
@@ -57,7 +57,7 @@ public class RecipeRestController {
         if (recipeDetails != null) {
             return ResponseEntity.ok(recipeDetails);
         } else {
-            return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).body(Collections.singletonList("Recipes not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonList("Recipes not found"));
         }
     }
 
