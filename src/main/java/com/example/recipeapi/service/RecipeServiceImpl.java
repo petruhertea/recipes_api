@@ -3,6 +3,7 @@ package com.example.recipeapi.service;
 import com.example.recipeapi.dao.RecipeRepository;
 import com.example.recipeapi.entity.IngredientDetails;
 import com.example.recipeapi.entity.RecipeDetails;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
@@ -20,6 +21,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
+    @Cacheable("allRecipes")
     public List<RecipeDetails> getAllRecipeDetails() {
         return recipeRepository.getAllRecipeDetails();
     }
@@ -120,6 +122,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
+    @Cacheable(value = "recipeById", key = "#recipeID")
     public RecipeDetails getRecipeById(Integer recipeID) {
         return recipeRepository.getRecipeById(recipeID);
     }
