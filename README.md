@@ -26,12 +26,20 @@ src/
 │   ├── java/com/example/recipeapi/
 │   │   ├── RecipeapiApplication.java      # Entry point, enables caching
 │   │   ├── dao/
-│   │   │   ├── RecipeRepository.java      # JPA repo with native SQL queries
+│   │   │   ├── RecipeRepository.java      # JPA repo with JPQL queries
 │   │   │   └── BeverageRepository.java    # JPA repo for beverage suggestions
+│   │   ├── dto/
+│   │   │   ├── BeverageDTO.java           # response DTO used by the beverage suggestion endpoint
+│   │   │   ├── IngredientDetails.java     # request DTO used by the recipe suggestions endpoint
+│   │   │   └── RecipeDTO.java             # response DTO used by the recipe related endpoints   
 │   │   ├── entity/
-│   │   │   ├── RecipeDetails.java         # Recipe entity / projection
+│   │   │   ├── Recipe.java                # Recipe entity / projection
 │   │   │   ├── Beverage.java              # Beverage entity / projection
-│   │   │   └── IngredientDetails.java     # DTO for ingredient weight + unit
+│   │   │   ├── RecipeIngredient.java      # Join Table entity to represent the relationship between Recipe and Ingredient
+│   │   │   ├── RecipeIngredientId.java    # Composite Key representation for the RecipeIngredient entity
+│   │   │   └── IngredientDetails.java     # Ingredient entity / projection
+│   │   ├── mapper/
+│   │   │   └── RecipeMapper.java          # Mapper class used to map entities responses to their respective DTO representations 
 │   │   ├── rest/
 │   │   │   ├── RecipeRestController.java  # Recipe endpoints
 │   │   │   └── BeverageRestController.java# Beverage endpoints
