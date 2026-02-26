@@ -102,7 +102,7 @@ Swagger UI is available at: **http://localhost:8080/swagger-ui.html**
 |--------|----------|-------------|
 | `GET` | `/api/v1/recipes` | Get all recipes with ingredients |
 | `GET` | `/api/v1/recipes/{recipeID}` | Get a single recipe by ID |
-| `POST` | `/api/v1/recipes/byIngredients` | Get recipes matching available ingredients |
+| `POST` | `/api/v1/recipes/by-ingredients` | Get recipes matching available ingredients |
 
 ### Beverages
 
