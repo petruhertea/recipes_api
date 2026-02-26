@@ -1,8 +1,7 @@
 package com.example.recipeapi.rest;
 
-import com.example.recipeapi.entity.Beverage;
+import com.example.recipeapi.dto.BeverageDTO;
 import com.example.recipeapi.service.BeverageService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,20 +13,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1")
 public class BeverageRestController {
-    BeverageService beverageService;
 
-    BeverageRestController(BeverageService beverageService) {
+    private final BeverageService beverageService;
+
+    public BeverageRestController(BeverageService beverageService) {
         this.beverageService = beverageService;
     }
 
-    @GetMapping("/recipes/{recipeID}/beverages")
-    public ResponseEntity getBeverageSuggestions(@PathVariable("recipeID") Integer recipeId) {
-        List<Beverage> beverageSuggestions = beverageService.getBeverageSuggestions(recipeId);
-
-        if (beverageSuggestions != null || recipeId != null) {
-            return new ResponseEntity<>(beverageSuggestions, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Beverages not found", HttpStatus.NOT_FOUND);
+    @GetMapping("/recipes/{id}/beverages")
+    public ResponseEntity<List<BeverageDTO>> getBeverageSuggestions(@PathVariable Integer id) {
+        List<BeverageDTO> suggestions = beverageService.getBeverageSuggestions(id);
+        if (suggestions.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok(suggestions);
     }
 }

@@ -1,8 +1,16 @@
-package com.example.recipeapi.entity;
+package com.example.recipeapi.dto;
 
+/**
+ * Request-body DTO for POST /api/v1/recipes/byIngredients.
+ * Each entry in the map represents an ingredient the user has available.
+ */
 public class IngredientDetails {
-    private final double weight;
+
+    private double weight;
     private String unit;
+
+    public IngredientDetails() {
+    }
 
     public IngredientDetails(double weight, String unit) {
         this.weight = weight;
@@ -14,7 +22,7 @@ public class IngredientDetails {
     }
 
     public void setWeight(double weight) {
-
+        this.weight = weight;
     }
 
     public String getUnit() {
@@ -28,6 +36,5 @@ public class IngredientDetails {
     @Override
     public String toString() {
         return weight + " " + unit;
-
     }
 }

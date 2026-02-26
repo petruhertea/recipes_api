@@ -1,30 +1,45 @@
 package com.example.recipeapi.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
+@Table(name = "beverage")
 public class Beverage {
-    @Id
-    private Integer beverageID;
 
-    private String beverageSuggestions;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "beverage_id")
+    private Integer id;
+
+    @Column(name = "name", length = 255)
+    private String name;
+
+    @Column(name = "beverage_image", length = 180)
     private String beverageImage;
 
-    public Integer getBeverageID() {
-        return beverageID;
+    @ManyToMany(mappedBy = "beverages")
+    private Set<Recipe> recipes = new HashSet<>();
+
+    public Beverage() {
     }
 
-    public void setBeverageID(Integer beverageID) {
-        this.beverageID = beverageID;
+    public Integer getId() {
+        return id;
     }
 
-    public String getBeverageSuggestions() {
-        return beverageSuggestions;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public void setBeverageSuggestions(String beverageSuggestions) {
-        this.beverageSuggestions = beverageSuggestions;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getBeverageImage() {
@@ -34,4 +49,18 @@ public class Beverage {
     public void setBeverageImage(String beverageImage) {
         this.beverageImage = beverageImage;
     }
+
+    public Set<Recipe> getRecipes() {
+        return recipes;
+    }
+
+    public void setRecipes(Set<Recipe> recipes) {
+        this.recipes = recipes;
+    }
 }
+
+
+
+
+
+

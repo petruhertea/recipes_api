@@ -1,8 +1,9 @@
 package com.example.recipeapi.service;
 
 import com.example.recipeapi.dao.RecipeRepository;
-import com.example.recipeapi.entity.IngredientDetails;
-import com.example.recipeapi.entity.RecipeDetails;
+import com.example.recipeapi.dto.IngredientDetails;
+import com.example.recipeapi.dto.RecipeDTO;
+import com.example.recipeapi.mapper.RecipeMapper;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -10,11 +11,12 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class RecipeServiceImpl implements RecipeService {
 
-    RecipeRepository recipeRepository;
+    private final RecipeRepository recipeRepository;
 
     public RecipeServiceImpl(RecipeRepository recipeRepository) {
         this.recipeRepository = recipeRepository;
@@ -22,108 +24,117 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     @Cacheable("allRecipes")
-    public List<RecipeDetails> getAllRecipeDetails() {
-        return recipeRepository.getAllRecipeDetails();
+    public List<RecipeDTO> getAllRecipes() {
+        return recipeRepository.findAllWithIngredients()
+                .stream()
+                .map(RecipeMapper::toDTO)
+                .toList();
     }
 
+    @Override
+    @Cacheable(value = "recipeById", key = "#id")
+    public Optional<RecipeDTO> getRecipeById(Integer id) {
+        return recipeRepository.findByIdWithIngredients(id)
+                .map(RecipeMapper::toDTO);
+    }
+
+    // ─── Ingredient Matching ─────────────────────────────────────────────
 
     @Override
-    public List<RecipeDetails> getRecipesByAvailableIngredients(Map<String, IngredientDetails> availableIngredients) {
-        var temp = recipeRepository.getAllRecipeDetails();
+    public List<RecipeDTO> getRecipesByAvailableIngredients(Map<String, IngredientDetails> availableIngredients) {
+        List<RecipeDTO> allRecipes = getAllRecipes();
 
-        // List to store fully matched recipes
-        List<RecipeDetails> fullyMatchedRecipes = new ArrayList<>();
-        // List to store partially matched recipes
-        List<RecipeDetails> partiallyMatchedRecipes = new ArrayList<>();
+        List<RecipeDTO> fullyMatched = new ArrayList<>();
+        List<RecipeDTO> partiallyMatched = new ArrayList<>();
 
-        for (RecipeDetails recipe : temp) {
-            String[] ingredients = recipe.getIngredients().split(",");
-            boolean fullyMatched = true;
-            boolean partiallyMatched = false;
+        for (RecipeDTO recipe : allRecipes) {
+            boolean fullyMatch = true;
+            boolean partialMatch = false;
 
-            for (String ingredient : ingredients) {
-                String[] details = ingredient.split(":");
-                String ingredientName = Normalizer.normalize(details[0].trim(), Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "").toLowerCase();
-                double weight = extractWeight(details[1].trim());
-                String recipeUnit = details[1].trim().split(" ")[1];
+            for (RecipeDTO.IngredientLineDTO line : recipe.getIngredients()) {
+                String recipeIngredientName = normalize(line.getName());
+                double requiredQty = line.getQuantity();
+                String recipeUnit = line.getUnit();
 
-                boolean ingredientFound = false;
+                boolean found = false;
 
-                for (String availableIngredientName : availableIngredients.keySet()) {
-                    String normalizedAvailableName = Normalizer.normalize(availableIngredientName, Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "").toLowerCase();
-                    if (ingredientName.contains(normalizedAvailableName) || normalizedAvailableName.contains(ingredientName)) {
-                        ingredientFound = true;
-                        IngredientDetails ingredientDetails = availableIngredients.get(availableIngredientName);
+                for (Map.Entry<String, IngredientDetails> entry : availableIngredients.entrySet()) {
+                    String availableName = normalize(entry.getKey());
 
-                        String requestUnit = ingredientDetails.getUnit();
+                    if (recipeIngredientName.contains(availableName) || availableName.contains(recipeIngredientName)) {
+                        found = true;
+                        IngredientDetails available = entry.getValue();
+                        double availableQty = convertToUnit(available.getWeight(), available.getUnit(), recipeUnit);
 
-                        if (!recipeUnit.equals(requestUnit)) {
-                            weight = convertUnits(requestUnit, recipeUnit, weight);
-                            recipeUnit = requestUnit;
-                        }
-
-                        if (weight > ingredientDetails.getWeight()) {
-                            fullyMatched = false;
+                        if (availableQty >= requiredQty) {
+                            partialMatch = true;
                         } else {
-                            partiallyMatched = true;
+                            fullyMatch = false;
                         }
                         break;
                     }
                 }
 
-                if (!ingredientFound) {
-                    fullyMatched = false;
+                if (!found) {
+                    fullyMatch = false;
                 }
             }
 
-            if (fullyMatched) {
-                fullyMatchedRecipes.add(recipe);
-            } else if (partiallyMatched) {
-                partiallyMatchedRecipes.add(recipe);
+            if (fullyMatch) {
+                fullyMatched.add(recipe);
+            } else if (partialMatch) {
+                partiallyMatched.add(recipe);
             }
         }
 
-        // Return fully matched recipes if any, otherwise return partially matched recipes
-        return fullyMatchedRecipes.isEmpty() ? partiallyMatchedRecipes : fullyMatchedRecipes;
+        return fullyMatched.isEmpty() ? partiallyMatched : fullyMatched;
     }
 
-    private double convertUnits(String requestUnit, String recipeUnit, double weight) {
-        if (requestUnit.equals(recipeUnit)) {
-            return weight;
-        }
+    // ─── Helpers ─────────────────────────────────────────────────────────
 
-        return switch (requestUnit) {
-            case "g" -> weight * 1000;
-            case "l" -> weight * 1000;
-            case "kg" -> weight / 1000;
-            case "mg" -> weight / 1000000;
-            case "ml" -> weight / 1000;
-            default -> 0;
+    /**
+     * Strips diacritics and lowercases for accent-insensitive comparison.
+     */
+    private String normalize(String text) {
+        return Normalizer
+                .normalize(text, Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .toLowerCase()
+                .trim();
+    }
+
+    /**
+     * Converts {@code amount} from {@code fromUnit} into {@code toUnit}.
+     * Returns the original amount if units already match or conversion is unknown.
+     */
+    private double convertToUnit(double amount, String fromUnit, String toUnit) {
+        if (fromUnit == null || toUnit == null || fromUnit.equalsIgnoreCase(toUnit)) {
+            return amount;
+        }
+        // Normalise to base unit first (grams / millilitres), then to target
+        double base = toBaseUnit(amount, fromUnit);
+        return fromBaseUnit(base, toUnit);
+    }
+
+    private double toBaseUnit(double amount, String unit) {
+        return switch (unit.toLowerCase()) {
+            case "kg" -> amount * 1000;
+            case "g" -> amount;
+            case "mg" -> amount / 1000;
+            case "l" -> amount * 1000;
+            case "ml" -> amount;
+            default -> amount;
         };
     }
 
-    private double extractWeight(String s) {
-        int start = 0;
-        for (int i = 0; i < s.length(); i++) {
-            if (Character.isDigit(s.charAt(i))) {
-                start = i;
-                break;
-            }
-        }
-        int stop = 0;
-        for (int i = start + 1; i < s.length(); i++) {
-            if (s.charAt(i) == ' ') {
-                stop = i;
-                break;
-            }
-        }
-        return Double.parseDouble(s.substring(start, stop));
-
-    }
-
-    @Override
-    @Cacheable(value = "recipeById", key = "#recipeID")
-    public RecipeDetails getRecipeById(Integer recipeID) {
-        return recipeRepository.getRecipeById(recipeID);
+    private double fromBaseUnit(double base, String targetUnit) {
+        return switch (targetUnit.toLowerCase()) {
+            case "kg" -> base / 1000;
+            case "g" -> base;
+            case "mg" -> base * 1000;
+            case "l" -> base / 1000;
+            case "ml" -> base;
+            default -> base;
+        };
     }
 }

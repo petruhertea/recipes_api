@@ -1,19 +1,18 @@
 package com.example.recipeapi.dao;
 
+
 import com.example.recipeapi.entity.Beverage;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface BeverageRepository extends CrudRepository<Beverage, Integer> {
-    @Query(value = "SELECT b.beverage_id AS beverageId, b.name AS beverage_suggestions, " +
-            "b.beverage_image AS beverage_image " +
-            "FROM recipe r " +
-            "LEFT JOIN recipebeverage rb ON r.recipe_id = rb.recipe_id " +
-            "LEFT JOIN beverage b ON rb.beverage_id = b.beverage_id " +
-            "WHERE r.recipe_id= :recipe_id ",
-            nativeQuery = true)
-    List<Beverage> getBeverageSuggestions(@Param("recipe_id") Integer recipeId);
+public interface BeverageRepository extends JpaRepository<Beverage, Integer> {
+
+    /**
+     * Fetch all beverages paired with a given recipe via the recipebeverage join table.
+     * Uses JPQL navigation through the Recipe.beverages ManyToMany relationship.
+     */
+    @Query("SELECT b FROM Beverage b JOIN b.recipes r WHERE r.id = :recipeId")
+    List<Beverage> findByRecipeId(Integer recipeId);
 }

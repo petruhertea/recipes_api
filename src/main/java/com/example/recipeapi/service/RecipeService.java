@@ -1,17 +1,17 @@
 package com.example.recipeapi.service;
 
-import com.example.recipeapi.entity.IngredientDetails;
-import com.example.recipeapi.entity.RecipeDetails;
+import com.example.recipeapi.dto.IngredientDetails;
+import com.example.recipeapi.dto.RecipeDTO;
 
 import java.util.List;
 import java.util.Map;
-
+import java.util.Optional;
 
 public interface RecipeService {
 
-    List<RecipeDetails> getAllRecipeDetails();
+    List<RecipeDTO> getAllRecipes();
 
-    List<RecipeDetails> getRecipesByAvailableIngredients(Map<String, IngredientDetails> availableIngredients);
+    Optional<RecipeDTO> getRecipeById(Integer id);
 
-    RecipeDetails getRecipeById(Integer recipeID);
+    List<RecipeDTO> getRecipesByAvailableIngredients(Map<String, IngredientDetails> availableIngredients);
 }
